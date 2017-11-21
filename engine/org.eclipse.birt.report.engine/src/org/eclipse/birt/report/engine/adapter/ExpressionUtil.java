@@ -13,10 +13,9 @@ package org.eclipse.birt.report.engine.adapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.birt.core.exception.BirtException;
+import org.eclipse.birt.core.script.JavascriptEvalUtil;
 import org.eclipse.birt.data.engine.api.IBaseExpression;
 import org.eclipse.birt.data.engine.api.IBinding;
 import org.eclipse.birt.data.engine.api.IConditionalExpression;
@@ -42,8 +41,6 @@ import org.eclipse.birt.report.engine.ir.Expression;
  */
 public final class ExpressionUtil
 {
-	private static Logger logger = Logger.getLogger( ExpressionUtil.class.getName());
-	
 	private static final String TOTAL_PREFIX = "TOTAL_COLUMN_";
 
 	private int totalColumnSuffix = 0;
@@ -537,11 +534,9 @@ public final class ExpressionUtil
 	
 	private IScriptExpression adapterExpression(Expression expr)
 	{
-		if ( expr instanceof Expression.Script && 
-				! Expression.SCRIPT_JAVASCRIPT.equals( 
-						( (Expression.Script) expr ).getLanguage( ) ) )
+		if ( expr instanceof Expression.Script
+				&& "bre".equals( ( (Expression.Script) expr ).getLanguage( ) ) )
 		{
-			// Adapts non-JS scripts using ModelAdapter service
 			ScriptExpression scriptExpr = null;
 			try
 			{
@@ -552,7 +547,7 @@ public final class ExpressionUtil
 			}
 			catch ( Exception ex )
 			{
-				logger.log(Level.WARNING, "Error adapting expr " + expr.getScriptText(), ex);
+
 			}
 		}
 		else

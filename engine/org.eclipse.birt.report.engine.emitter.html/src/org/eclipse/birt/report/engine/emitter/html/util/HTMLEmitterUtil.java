@@ -234,7 +234,6 @@ public class HTMLEmitterUtil
 	}
 	
 	public static int BROWSER_UNKNOW = -1;
-	public static int BROWSER_FIREFOX = 10;
 	public static int BROWSER_FIREFOX1 = 11;
 	public static int BROWSER_FIREFOX2 = 12;
 	public static int BROWSER_FIREFOX3 = 13;
@@ -267,10 +266,6 @@ public class HTMLEmitterUtil
 		else if ( userAgent.contains( "Firefox/2" ) )
 		{
 			return BROWSER_FIREFOX2;
-		}
-		else if ( userAgent.contains( "Firefox" ) )
-		{
-			return BROWSER_FIREFOX;
 		}
 		else
 			return BROWSER_UNKNOW;

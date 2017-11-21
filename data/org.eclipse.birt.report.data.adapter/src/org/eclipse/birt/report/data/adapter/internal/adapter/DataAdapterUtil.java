@@ -47,7 +47,6 @@ import org.eclipse.birt.report.model.api.ReportElementHandle;
 import org.eclipse.birt.report.model.api.ResultSetColumnHandle;
 import org.eclipse.birt.report.model.api.SortHintHandle;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
-import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
 import org.eclipse.birt.report.model.api.elements.structures.DataSetParameter;
 import org.eclipse.birt.report.model.api.metadata.IPropertyDefn;
 
@@ -350,12 +349,8 @@ public class DataAdapterUtil
 		dteColumn.setCompressedColumn( modelColumnHint.isCompressed( ) );
 		
 		String displayName = modelColumnHint.getDisplayName( );
-		if ( modelColumnHint.getDisplayNameKey( ) != null )
-		{
-			displayName = modelColumnHint.getExternalizedValue(
-					ColumnHint.DISPLAY_NAME_ID_MEMBER,
-					ColumnHint.DISPLAY_NAME_MEMBER );
-		}
+		if( modelColumnHint.getDisplayNameKey( )!= null )
+			displayName = modelColumnHint.getExternalizedValue( modelColumnHint.getDisplayNameKey( ), displayName );
 		dteColumn.setDisplayName( displayName );
  		String exportConstant = modelColumnHint.getExport( );
 		if ( exportConstant != null )

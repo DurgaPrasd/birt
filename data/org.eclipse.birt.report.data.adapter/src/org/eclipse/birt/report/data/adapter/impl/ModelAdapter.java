@@ -97,7 +97,7 @@ import org.mozilla.javascript.Scriptable;
  */
 public class ModelAdapter implements IModelAdapter
 {
-	protected static Logger logger = Logger.getLogger( ModelAdapter.class.getName( ) );
+	private static Logger logger = Logger.getLogger( ModelAdapter.class.getName( ) );
 	DataSessionContext context;
 	
 	public ModelAdapter( DataSessionContext context)
@@ -902,9 +902,7 @@ public class ModelAdapter implements IModelAdapter
 			{
 				Expression expr = (Expression)arg.getExpressionProperty( AggregationArgument.VALUE_MEMBER ).getValue( );
 				ScriptExpression scriptExpression = this.adaptExpression( expr );
-				if ( expr != null && 
-						! ExpressionType.JAVASCRIPT.equals( expr.getType( ) ) 
-						&& scriptExpression == null )
+				if ( expr != null && "bre".equals( expr.getType( ) ) && scriptExpression == null )
 					throw new AdapterException(Message.formatMessage(
 							ResourceConstants.INVALID_BINDING_EXPRESSION,
 							new Object[] { expr.getStringExpression() } ) );
@@ -959,7 +957,7 @@ public class ModelAdapter implements IModelAdapter
 			jsExpr.setHandle( expr.getExpression( ) );
 			return jsExpr;
 		}
-		else if ( ! ExpressionType.JAVASCRIPT.equals( expr.getType( ) ) )
+		else if ( "bre".equals( expr.getType( ) ) )
 		{
 			return null;
 		}

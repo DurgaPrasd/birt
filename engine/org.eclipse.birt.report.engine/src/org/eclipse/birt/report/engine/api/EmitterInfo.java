@@ -32,7 +32,6 @@ public class EmitterInfo
 	private String supportedImageFormats;
 	private boolean needOutputResultSet;
 	private int overridePriority;
-	private boolean isFormatDeprecated;
 
 	/**
 	 * whether emitter need to output the display:none or process it in layout
@@ -201,24 +200,5 @@ public class EmitterInfo
 	{
 		this.overridePriority = overridePriority;
 	}
-	
-	/**
-	 * Get if the emitter format is deprecated
-	 * 
-	 * @return
-	 */
-	public boolean isFormatDeprecated( )
-	{
-		return isFormatDeprecated;
-	}
-	
-	/**
-	 * Set if the emitter format is deprecated
-	 * 
-	 * @param isFormatDeprecated
-	 */
-	public void setFormatDeprecated( boolean isFormatDeprecated )
-	{
-		this.isFormatDeprecated = isFormatDeprecated;
-	}
+
 }

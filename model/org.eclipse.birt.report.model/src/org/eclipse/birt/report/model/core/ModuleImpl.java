@@ -933,7 +933,8 @@ public abstract class ModuleImpl extends DesignElement
 
 		// find it in the linked resource file.
 
-		List<Object> baseNameList = getIncludedResources( );
+		List<Object> baseNameList = getListProperty( getModule( ),
+				INCLUDE_RESOURCE_PROP );
 		if ( baseNameList == null || baseNameList.size( ) == 0 )
 			return null;
 
@@ -951,16 +952,6 @@ public abstract class ModuleImpl extends DesignElement
 		}
 
 		return msg;
-	}
-	
-	/**
-	 * Finds all included resources in current module
-	 * 
-	 * @return 4.7
-	 */
-	public List<Object> getIncludedResources( )
-	{
-		return getListProperty( getModule( ), INCLUDE_RESOURCE_PROP );
 	}
 
 	/**

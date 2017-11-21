@@ -612,11 +612,6 @@ public class ExtensionManager
 						.getAttribute( "isHidden" ) );
 				boolean needOutputResultSet = Boolean.valueOf( configs[j]
 						.getAttribute( "needOutputResultSet" ) );
-				String isFormatDeprecated = configs[j].getAttribute( "isFormatDeprecated" );
-				boolean deprecated = false;
-				if ( null != isFormatDeprecated ) {
-					deprecated = Boolean.valueOf( isFormatDeprecated ).booleanValue( );
-				}
 				if ( !Pattern.matches( emitterFormatPattern, format ) )
 				{
 					logger.log(
@@ -633,7 +628,6 @@ public class ExtensionManager
 							supportedImageFormats, needOutputResultSet,
 							configs[j] );
 					emitterInfo.setOverridePriority( priority );
-					emitterInfo.setFormatDeprecated( deprecated );
 
 					EmitterInfo existedInfo = (EmitterInfo) emitters.get( id );
 					if ( existedInfo != null )

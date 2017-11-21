@@ -17,7 +17,6 @@ import org.eclipse.birt.chart.ui.extension.i18n.Messages;
 import org.eclipse.birt.chart.ui.swt.interfaces.IUIServiceProvider;
 import org.eclipse.birt.chart.ui.util.ChartUIUtil;
 import org.eclipse.birt.chart.ui.util.UIHelper;
-import org.eclipse.birt.chart.util.ChartUtil;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -169,9 +168,13 @@ public class ExternalizedTextEditorComposite extends Canvas implements Selection
 		{
 			return sKey + ExternalizedTextEditorComposite.SEPARATOR + sCurrent;
 		}
+    	else if ( sCurrent.contains( ExternalizedTextEditorComposite.SEPARATOR ) )
+		{
+			return ExternalizedTextEditorComposite.SEPARATOR + sCurrent;
+		}
     	else
 		{
-    		return ChartUtil.prefixExternalizeSeperator( sCurrent );
+			return sCurrent;
 		}
     }
 

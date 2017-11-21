@@ -99,7 +99,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty.version}</version>
+				<version>9.3.8.v20160314</version>
 				<configuration>					
 					<war>${birtpackages.basedir}/birt-runtime-osgi/target/package/birt.war</war> 					
 					<scanIntervalSeconds>10</scanIntervalSeconds>

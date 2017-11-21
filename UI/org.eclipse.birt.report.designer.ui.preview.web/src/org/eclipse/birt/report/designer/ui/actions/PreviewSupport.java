@@ -85,33 +85,17 @@ abstract class PreviewSupport
 		}
 
 		TreeMap<String, List<EmitterInfo>> supportedFormats = new TreeMap<String, List<EmitterInfo>>( );
-		TreeMap<String, List<EmitterInfo>> deprecatedFormats = new TreeMap<String, List<EmitterInfo>>( );
 
 		for ( EmitterInfo ei : emitters )
 		{
 			if ( !ei.isHidden( ) )
 			{
-				List<EmitterInfo> list = null;
-				
-				if ( !ei.isFormatDeprecated( ) )
+				List<EmitterInfo> list = supportedFormats.get( ei.getFormat( ) );
+
+				if ( list == null )
 				{
-					list = supportedFormats.get( ei.getFormat( ) );
-	
-					if ( list == null )
-					{
-						list = new ArrayList<EmitterInfo>( );
-						supportedFormats.put( ei.getFormat( ), list );
-					}
-				}
-				else 
-				{
-					list = deprecatedFormats.get( ei.getFormat( ) );
-					
-					if ( list == null )
-					{
-						list = new ArrayList<EmitterInfo>( );
-						deprecatedFormats.put( ei.getFormat( ), list );
-					}
+					list = new ArrayList<EmitterInfo>( );
+					supportedFormats.put( ei.getFormat( ), list );
 				}
 
 				list.add( ei );
@@ -170,61 +154,48 @@ abstract class PreviewSupport
 
 			previewOption.setImage( getFormatIcon( format, emits ) );
 
-			processEmits( previewOption, emits, configManager );
-		}
-		
-		for ( Entry<String, List<EmitterInfo>> ent : deprecatedFormats.entrySet( ) )
-		{
-			final String format = ent.getKey( );
-			final List<EmitterInfo> emits = ent.getValue( );
-
-			MenuItem previewOption = new MenuItem( menu,
-					emits.size( ) > 1 ? SWT.CASCADE : SWT.PUSH );
-
-			previewOption.setText(  Messages.getFormattedString( fullLabel ? "designer.preview.previewaction.label" //$NON-NLS-1$
-							: "designer.preview.run", //$NON-NLS-1$
-							new Object[]{
-								format.toUpperCase( ) + " " + Messages.getString( "designer.preview.deprecated.label" )
-							} ) );
-
-			previewOption.setImage( getFormatIcon( format, emits ) );
-
-			processEmits( previewOption, emits, configManager );
-		}
-
-		return menu;
-	}
-	
-	private void processEmits( MenuItem previewOption, List<EmitterInfo> emits, EmitterConfigurationManager configManager )
-	{
-		if ( emits.size( ) > 1 )
-		{
-			Menu subMenu = new Menu( previewOption );
-			previewOption.setMenu( subMenu );
-
-			int j = 1;
-			for ( final EmitterInfo ei : emits )
+			if ( emits.size( ) > 1 )
 			{
-				MenuItem sub1 = new MenuItem( subMenu, SWT.PUSH );
+				Menu subMenu = new Menu( previewOption );
+				previewOption.setMenu( subMenu );
 
+				int j = 1;
+				for ( final EmitterInfo ei : emits )
+				{
+					MenuItem sub1 = new MenuItem( subMenu, SWT.PUSH );
+
+					final IEmitterDescriptor emitterDescriptor = configManager.getEmitterDescriptor( ei.getID( ) );
+
+					String label = null;
+
+					if ( emitterDescriptor != null
+							&& emitterDescriptor.getDisplayName( ) != null )
+					{
+						label = emitterDescriptor.getDisplayName( );
+					}
+
+					if ( label == null )
+					{
+						label = getDefaultLabel( ei );
+					}
+
+					sub1.setText( "&" + ( j++ ) + " " + label ); //$NON-NLS-1$ //$NON-NLS-2$
+
+					sub1.addSelectionListener( new SelectionAdapter( ) {
+
+						public void widgetSelected( SelectionEvent e )
+						{
+							preview( ei, emitterDescriptor );
+						}
+					} );
+				}
+			}
+			else
+			{
+				final EmitterInfo ei = emits.get( 0 );
 				final IEmitterDescriptor emitterDescriptor = configManager.getEmitterDescriptor( ei.getID( ) );
 
-				String label = null;
-
-				if ( emitterDescriptor != null
-						&& emitterDescriptor.getDisplayName( ) != null )
-				{
-					label = emitterDescriptor.getDisplayName( );
-				}
-
-				if ( label == null )
-				{
-					label = getDefaultLabel( ei );
-				}
-
-				sub1.setText( "&" + ( j++ ) + " " + label ); //$NON-NLS-1$ //$NON-NLS-2$
-
-				sub1.addSelectionListener( new SelectionAdapter( ) {
+				previewOption.addSelectionListener( new SelectionAdapter( ) {
 
 					public void widgetSelected( SelectionEvent e )
 					{
@@ -233,19 +204,8 @@ abstract class PreviewSupport
 				} );
 			}
 		}
-		else
-		{
-			final EmitterInfo ei = emits.get( 0 );
-			final IEmitterDescriptor emitterDescriptor = configManager.getEmitterDescriptor( ei.getID( ) );
 
-			previewOption.addSelectionListener( new SelectionAdapter( ) {
-
-				public void widgetSelected( SelectionEvent e )
-				{
-					preview( ei, emitterDescriptor );
-				}
-			} );
-		}
+		return menu;
 	}
 
 	private String getDefaultLabel( EmitterInfo ei )

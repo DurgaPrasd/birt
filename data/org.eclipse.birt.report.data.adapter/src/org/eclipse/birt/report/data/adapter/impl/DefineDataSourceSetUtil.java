@@ -148,9 +148,6 @@ public class DefineDataSourceSetUtil
 	public static void prepareForTransientQuery( DataSessionContext dContext, DataEngineImpl dataEngine, DataSetHandle handle,
 			IQueryDefinition queryDefn, IDataQueryDefinition[] registedQueries, IDataSetInterceptorContext interceptorContext ) throws BirtException 
 	{
-		if (interceptorContext == null)
-			return;
-		
 		IBaseDataSetDesign design = null;
 		if( handle == null )
 		{

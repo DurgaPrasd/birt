@@ -22,8 +22,8 @@ import org.eclipse.birt.data.engine.api.IQueryDefinition;
 import org.eclipse.birt.data.engine.api.IQueryResults;
 import org.eclipse.birt.data.engine.api.IScriptExpression;
 import org.eclipse.birt.data.engine.api.ISortDefinition;
-import org.eclipse.birt.data.engine.api.querydefn.BaseExpression;
 import org.eclipse.birt.data.engine.api.querydefn.QueryDefinition;
+import org.eclipse.birt.data.engine.core.DataException;
 import org.eclipse.birt.report.data.adapter.api.DataRequestSession;
 import org.eclipse.birt.report.data.adapter.api.DataSessionContext;
 import org.eclipse.birt.report.data.adapter.api.IModelAdapter;
@@ -45,7 +45,6 @@ import org.eclipse.birt.report.engine.api.IRunnable;
 import org.eclipse.birt.report.engine.extension.IDataExtractionExtension;
 import org.eclipse.birt.report.engine.extension.internal.ExtensionManager;
 import org.eclipse.birt.report.engine.i18n.MessageConstants;
-import org.eclipse.birt.report.engine.ir.Expression;
 import org.eclipse.birt.report.engine.script.internal.ReportScriptExecutor;
 import org.eclipse.birt.report.model.api.AbstractScalarParameterHandle;
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -469,51 +468,47 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 		if ( expr instanceof IScriptExpression )
 		{
 			IScriptExpression script = (IScriptExpression) expr;
-			try
+			if ( script != null )
 			{
-				IScriptExpression scriptExpr = script;
-				String scriptId = script.getScriptId();
-				if ( BaseExpression.constantId.equals( scriptId ))
+				try
 				{
-					// Constant expression can't refer to columns
-					return;
-				}
-				// convert non-JavaScript expression into JS expression
-				if ( ! Expression.SCRIPT_JAVASCRIPT.equals( scriptId ) )
-				{
-					IModelAdapter adapter = getModelAdapter( );
-					scriptExpr = adapter.adaptJSExpression(
-							script.getText( ), script.getScriptId( ) );
-				}
-
-				// find referenced binding names
-				// the script text may be null value, for example: a value
-				// list which contains a none value.
-				if ( scriptExpr != null )
-				{
-					List<IColumnBinding> columns = ExpressionUtil
-							.extractColumnExpressions( scriptExpr.getText( ) );
-					for ( IColumnBinding col : columns )
+					IScriptExpression scriptExpr = script;
+					// convert BRE expression into javascript expression
+					if ( "bre".equals( script.getScriptId( ) ) )
 					{
-						referencedRows.add( col.getResultSetColumnName( ) );
+						IModelAdapter adapter = getModelAdapter( );
+						scriptExpr = adapter.adaptJSExpression(
+								script.getText( ), script.getScriptId( ) );
 					}
 
-					if ( referencedDSRows != null )
+					// find referenced binding names
+					// the script text may be null value, for example: a value
+					// list which contains a none value.
+					if ( scriptExpr != null )
 					{
-						columns = ExpressionUtil.extractColumnExpressions(
-								scriptExpr.getText( ),
-								ExpressionUtil.DATASET_ROW_INDICATOR );
+						List<IColumnBinding> columns = ExpressionUtil
+								.extractColumnExpressions( scriptExpr.getText( ) );
 						for ( IColumnBinding col : columns )
 						{
-							referencedDSRows.add( col
-									.getResultSetColumnName( ) );
+							referencedRows.add( col.getResultSetColumnName( ) );
+						}
+
+						if ( referencedDSRows != null )
+						{
+							columns = ExpressionUtil.extractColumnExpressions(
+									scriptExpr.getText( ),
+									ExpressionUtil.DATASET_ROW_INDICATOR );
+							for ( IColumnBinding col : columns )
+							{
+								referencedDSRows.add( col
+										.getResultSetColumnName( ) );
+							}
 						}
 					}
 				}
-			}
-			catch ( BirtException e )
-			{
-				log.log(Level.WARNING, "Error processing script: " + script.getText(), e);
+				catch ( BirtException e )
+				{
+				}
 			}
 		}
 		else if ( expr instanceof IConditionalExpression )

@@ -10,7 +10,6 @@
               format="doc"
               id="org.eclipse.birt.report.engine.emitter.word"
               pagination="page-break-pagination"
-              mimeType="application/msword"
-              isFormatDeprecated="true"/>
+              mimeType="application/msword"/>
   	</extension>  
 </plugin>

@@ -142,21 +142,21 @@ public class DataRequestSessionImpl extends DataRequestSession
 {
 	private static Logger logger = Logger.getLogger( DataRequestSessionImpl.class.getName( ) );
 	//
-	protected DataEngineImpl dataEngine;
-	protected IModelAdapter modelAdaptor;
-	protected DataSessionContext sessionContext;
-	protected Map cubeHandleMap, cubeMetaDataHandleMap;
+	private DataEngineImpl dataEngine;
+	private IModelAdapter modelAdaptor;
+	private DataSessionContext sessionContext;
+	private Map cubeHandleMap, cubeMetaDataHandleMap;
 
-	protected Map<ReportElementHandle, QueryDefinition> cubeQueryMap = new HashMap<ReportElementHandle, QueryDefinition>();
-	protected Map<ReportElementHandle, List<ColumnMeta>> cubeMetaMap = new HashMap<ReportElementHandle, List<ColumnMeta>>();
+	private Map<ReportElementHandle, QueryDefinition> cubeQueryMap = new HashMap<ReportElementHandle, QueryDefinition>();
+	private Map<ReportElementHandle, List<ColumnMeta>> cubeMetaMap = new HashMap<ReportElementHandle, List<ColumnMeta>>();
 	//Used to avoid creating same dimension repeatedly when a dimension is shared by multiple cubes
-	protected Map<String, IDimension> createdDimensions;
+	private Map<String, IDimension> createdDimensions;
 
-	protected CubeMaterializer cubeMaterializer;
-	protected IDataQueryDefinition[] registeredQueries;
-	protected IDataSetInterceptorContext interceptorContext;
+	private CubeMaterializer cubeMaterializer;
+	private IDataQueryDefinition[] registeredQueries;
+	private IDataSetInterceptorContext interceptorContext;
 
-	protected CubeMaterializer getCubeMaterializer( int cacheSize ) throws BirtException
+	private CubeMaterializer getCubeMaterializer( int cacheSize ) throws BirtException
 	{
 		//Make sure only one instance, do not created until really needed
 		if ( cubeMaterializer == null )
@@ -286,7 +286,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @return
 	 * @throws BirtException
 	 */
-	protected IColumnValueIterator getColumnValueIterator( DataSetHandle dataSet,
+	private IColumnValueIterator getColumnValueIterator( DataSetHandle dataSet,
 			Iterator inputParamBindings, Iterator columnBindings,
 			Iterator groupDefn, String boundColumnName, boolean useDataSetFilter, IRequestInfo requestInfo )
 			throws BirtException
@@ -540,7 +540,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @return
 	 * @throws BirtException
 	 */
-	protected IQueryResults getQueryResults( DataSetHandle dataSet,
+	private IQueryResults getQueryResults( DataSetHandle dataSet,
 			Iterator inputParamBindings, Iterator columnBindings,
 			Iterator groupDefns, String boundColumnName, boolean useDataSetFilter ) throws BirtException
 	{
@@ -803,37 +803,6 @@ public class DataRequestSessionImpl extends DataRequestSession
 		}
 	}
 
-	// Appcontext entries that may be temporarily modified during createCube call
-	protected static final String[] APPCONTEXT_BACKUP_KEYS = {
-				DataEngine.MEMORY_DATA_SET_CACHE,
-				DataEngine.DATA_SET_CACHE_ROW_LIMIT };
-	
-	/**
-	 * Create a backup of app context values that may be changed during cube creation
-	 */
-	protected Map<Object,Object> backupAppContextForCube(Map<Object,Object> originalAppContext) 
-	{
-		Map<Object, Object> backup = new HashMap<Object, Object>();
-		for ( String key : APPCONTEXT_BACKUP_KEYS ) 
-		{
-			if ( originalAppContext.containsKey( key ))
-				backup.put( key, originalAppContext.get( key ) );
-		}
-		return backup;
-	}
-	
-	/**
-	 * Restore appcontext value based on backup taken with backupAppContextForCube
-	 */
-	protected void restoreAppContext(Map<Object,Object> appContext, Map<Object,Object> backup)
-	{
-		for ( String key : APPCONTEXT_BACKUP_KEYS ) 
-		{
-			appContext.remove( key );
-		}
-		appContext.putAll( backup );
-	}
-	
 	/**
 	 *
 	 * @param cubeHandle
@@ -844,21 +813,21 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @throws BirtException
 	 * @throws DataException
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected void createCube( TabularCubeHandle cubeHandle,
+	private void createCube( TabularCubeHandle cubeHandle,
 			CubeMaterializer cubeMaterializer, Map appContext ) throws BirtException
 	{
 		SecurityListener sl = new SecurityListener( this );
 		sl.start( cubeHandle );
 
+
+		Map<?,?> backupAppContext = new HashMap();
+		if( appContext == null )
+			appContext = new HashMap();
 		//Please note that we should always use original application context during query execution,
 		//rather than create a new one with same properties.Application Context is sometimes used as cross-query
 		//information carrier.
-		// Also make sure that the backup/restore steps don't alter appcontext values updated/added by 
-		// downstream components
-		if( appContext == null )
-			appContext = new HashMap();
-		Map<Object,Object> backupAppContext = backupAppContextForCube(appContext);
+
+		backupAppContext.putAll( appContext );
 
 		List measureNames = new ArrayList( );
 		Map calculatedMeasure = new HashMap( );
@@ -1112,7 +1081,8 @@ public class DataRequestSessionImpl extends DataRequestSession
 
 		sl.end( );
 
-		restoreAppContext( appContext, backupAppContext );
+		appContext.clear( );
+		appContext.putAll( backupAppContext );
 	}
 
 	public static long computeMemoryBufferSize( Map appContext )
@@ -1130,7 +1100,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param propValue
 	 * @return
 	 */
-	protected static long populateMemBufferSize( Object propValue )
+	private static long populateMemBufferSize( Object propValue )
 	{
 		String targetBufferSize =  propValue == null
 				? "0" : propValue
@@ -1144,7 +1114,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return memoryCacheSize;
 	}
 
-	protected String getLevelName( TabularHierarchyHandle hierhandle, String columnName )
+	private String getLevelName( TabularHierarchyHandle hierhandle, String columnName )
 	{
 		List levels = hierhandle.getContents( TabularHierarchyHandle.LEVELS_PROP );
 		for ( int k = 0; k < levels.size( ); k++ )
@@ -1163,7 +1133,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param cubeHandle
 	 * @throws BirtException
 	 */
-	protected void prepareForCubeGeneration( CubeHandle cHandle )
+	private void prepareForCubeGeneration( CubeHandle cHandle )
 			throws BirtException
 	{
 		TabularCubeHandle cubeHandle = null;
@@ -1243,7 +1213,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @return
 	 * @throws BirtException
 	 */
-	protected FilterDefinition buildFilterForTimeDimension( DimensionHandle dim,
+	private FilterDefinition buildFilterForTimeDimension( DimensionHandle dim,
 			TabularHierarchyHandle hier ) throws BirtException
 	{
 		Date startTime = CubeHandleUtil.getStartTime( dim );
@@ -1288,7 +1258,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param cubeHandle
 	 * @return
 	 */
-	protected List getDataSetsToCache( TabularCubeHandle cubeHandle )
+	private List getDataSetsToCache( TabularCubeHandle cubeHandle )
 	{
 		List list = new ArrayList( );
 		if( cubeHandle.getDataSet( ) == null )
@@ -1308,7 +1278,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return list;
 	}
 
-	protected Set getInvolvedDataSets(TabularCubeHandle cubeHandle)
+	private Set getInvolvedDataSets(TabularCubeHandle cubeHandle)
 	{
 		return new HashSet(getDataSetsToCache(cubeHandle));
 	}
@@ -1319,7 +1289,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param colName
 	 * @return
 	 */
-	protected boolean isAttribute( IDimension dimension, String levelName,
+	private boolean isAttribute( IDimension dimension, String levelName,
 			String colName )
 	{
 		ILevel[] levels = dimension.getHierarchy( ).getLevels( );
@@ -1349,7 +1319,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param targetName
 	 * @return
 	 */
-	protected String getLevelName( IDimension dimension, String targetName )
+	private String getLevelName( IDimension dimension, String targetName )
 	{
 		ILevel[] levels = dimension.getHierarchy( ).getLevels( );
 		for ( int j = 0; j < levels.length; j++ )
@@ -1374,7 +1344,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @throws BirtException
 	 * @throws DataException
 	 */
-	protected IDimension[] populateDimensions( CubeMaterializer cubeMaterializer,
+	private IDimension[] populateDimensions( CubeMaterializer cubeMaterializer,
 			TabularCubeHandle cubeHandle, Map appContext,
 			SecurityListener sl ) throws AdapterException
 	{
@@ -1415,7 +1385,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @throws BirtException
 	 * @throws DataException
 	 */
-	protected IDimension populateDimension( CubeMaterializer cubeMaterializer,
+	private IDimension populateDimension( CubeMaterializer cubeMaterializer,
 			DimensionHandle dim, TabularCubeHandle cubeHandle, Map appContext,SecurityListener sl )
 			throws AdapterException
 	{
@@ -1568,7 +1538,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		}
 	}
 
-	protected String[] getFieldName( TabularHierarchyHandle timeHierhandle )
+	private String[] getFieldName( TabularHierarchyHandle timeHierhandle )
 	{
 		List levels = timeHierhandle.getContents( TabularHierarchyHandle.LEVELS_PROP );
 		String[] fieldName = new String[levels.size( )];
@@ -1580,7 +1550,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return fieldName;
 	}
 
-	protected String[] getTimeLevelType( TabularHierarchyHandle timeHierhandle )
+	private String[] getTimeLevelType( TabularHierarchyHandle timeHierhandle )
 	{
 		List levels = timeHierhandle.getContents( TabularHierarchyHandle.LEVELS_PROP );
 		String[] timeType = new String[levels.size( )];
@@ -1593,7 +1563,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	}
 
 
-	protected String[] getJointHierarchyKeys( TabularCubeHandle cubeHandle, TabularHierarchyHandle hier )
+	private String[] getJointHierarchyKeys( TabularCubeHandle cubeHandle, TabularHierarchyHandle hier )
 	{
 		List<String> hierarchyKeys = new ArrayList( );
 		if ( hier.getDataSet( ) != null && !hier.getDataSet( ).equals(cubeHandle.getDataSet( )))
@@ -1630,7 +1600,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @throws BirtException
 	 * @throws DataException
 	 */
-	protected IDimension populateTempPKDimension( CubeMaterializer cubeMaterializer,
+	private IDimension populateTempPKDimension( CubeMaterializer cubeMaterializer,
 			TabularCubeHandle cubeHandle,DataSetIteratorForTempPK dataForTempPK, Map appContext )
 			throws AdapterException
 	{
@@ -1673,7 +1643,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param object
 	 * @return
 	 */
-	protected String[] toStringArray( List object )
+	private String[] toStringArray( List object )
 	{
 		if( object == null )
 			return null;
@@ -1737,7 +1707,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return this.dataEngine.prepare( query, appContext );
 	}
 	
-	protected void populateMeasureDefinitionForCalculateMeasures ( ICubeQueryDefinition query ) throws BirtException
+	private void populateMeasureDefinitionForCalculateMeasures ( ICubeQueryDefinition query ) throws BirtException
 	{	
 		List calculatedMeasures = query.getDerivedMeasures( );
 		List measures = query.getMeasures( );
@@ -1817,7 +1787,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		}
 	}
 	
-	protected void validateBindings( List<IBinding> bindings,
+	private void validateBindings( List<IBinding> bindings,
 			Collection calculatedMeasures ) throws AdapterException
 	{
 		// Not support aggregation filter reference calculated measures.
@@ -1850,7 +1820,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		}
 	}
 	
-	protected void setMeasureDataTypeForCubeQuery( ICubeQueryDefinition query )
+	private void setMeasureDataTypeForCubeQuery( ICubeQueryDefinition query )
 	{
 		List measures = query.getMeasures( );
 
@@ -1884,7 +1854,7 @@ public class DataRequestSessionImpl extends DataRequestSession
      * @throws DataException
      * @throws AdapterException
      */
-    protected void refactorCubeQueryDefinition( ICubeQueryDefinition query )
+    private void refactorCubeQueryDefinition( ICubeQueryDefinition query )
 			throws DataException, AdapterException
 	{
 		List bindings = query.getBindings( );
@@ -1919,7 +1889,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param measureName
 	 * @return
 	 */
-	protected String getAggrFunction( ICubeQueryDefinition query,
+	private String getAggrFunction( ICubeQueryDefinition query,
 			String measureName )
 	{
 		for ( Iterator itr = query.getMeasures( ).iterator( ); itr.hasNext( ); )
@@ -1948,7 +1918,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return "SUM";
 	}
 
-	protected List getAllAggrOns( ICubeQueryDefinition query )
+	private List getAllAggrOns( ICubeQueryDefinition query )
 	{
 		List levels = CubeQueryDefinitionUtil.populateMeasureAggrOns( query );
 		List levelExprs = new ArrayList();
@@ -1969,7 +1939,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param handle
 	 * @return
 	 */
-	protected static ResourceIdentifiers createResourceIdentifiers(
+	private static ResourceIdentifiers createResourceIdentifiers(
 			final ModuleHandle handle )
 	{
 		if ( handle == null )
@@ -2101,7 +2071,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * Set the module handle instance to appContext
 	 *
 	 */
-	protected void setModuleHandleToAppContext( )
+	private void setModuleHandleToAppContext( )
 	{
 		if ( this.sessionContext.getAppContext( ) == null )
 		{
@@ -2110,7 +2080,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		setModuleHandleToAppContext( this.sessionContext.getAppContext( ) );
 	}
 
-	protected void setModuleHandleToAppContext( Map appContext )
+	private void setModuleHandleToAppContext( Map appContext )
 	{
 		if ( appContext == null )
 		{
@@ -2133,7 +2103,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		}
 	}
 
-	protected void defineDataSourceDataSet( IQueryDefinition queryDefn ) throws BirtException
+	private void defineDataSourceDataSet( IQueryDefinition queryDefn ) throws BirtException
 	{
 		String dataSetName = queryDefn.getDataSetName( );
 
@@ -2171,7 +2141,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param hierHandle
 	 * @throws BirtException
 	 */
-	protected void prepareLevels( QueryDefinition query,
+	private void prepareLevels( QueryDefinition query,
 			TabularHierarchyHandle hierHandle, List metaList, String dimName, String levelColumnName, boolean addGroup )
 			throws BirtException
 	{
@@ -2365,7 +2335,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @throws DataException
 	 * @throws AdapterException
 	 */
-	protected void prepareMeasure( TabularCubeHandle cubeHandle,
+	private void prepareMeasure( TabularCubeHandle cubeHandle,
 			QueryDefinition query, List metaList ) throws AdapterException
 	{
 		try
@@ -2417,7 +2387,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param query
 	 * @throws AdapterException
 	 */
-	protected static void popualteFilter( DataRequestSession session,
+	private static void popualteFilter( DataRequestSession session,
 			Iterator filterIterator, QueryDefinition query ) throws AdapterException
 	{
 		while( filterIterator.hasNext( ) )
@@ -2427,7 +2397,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		}
 	}
 
-	 protected boolean isDateTimeDimension( TabularHierarchyHandle hierHandle )
+	 private boolean isDateTimeDimension( TabularHierarchyHandle hierHandle )
 	 {
 		 List levels = hierHandle.getContents( TabularHierarchyHandle.LEVELS_PROP );
 
@@ -2535,7 +2505,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return query;
 	}
 
-	protected boolean existColumnName( TabularHierarchyHandle hierHandle, String name )
+	private boolean existColumnName( TabularHierarchyHandle hierHandle, String name )
 	{
 		List levels = hierHandle.getContents( TabularHierarchyHandle.LEVELS_PROP );
 
@@ -2548,7 +2518,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return false;
 	}
 
-	protected DimensionJoinConditionHandle getFacttableJointKey(TabularCubeHandle cubeHandle,
+	private DimensionJoinConditionHandle getFacttableJointKey(TabularCubeHandle cubeHandle,
 			TabularHierarchyHandle hierHandle)
 	{
 		Iterator it = cubeHandle.joinConditionsIterator( );
@@ -2577,7 +2547,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @return
 	 * @throws BirtException
 	 */
-	protected QueryDefinition createQueryForTempPKDimension(
+	private QueryDefinition createQueryForTempPKDimension(
 		TabularCubeHandle cubeHandle ) throws BirtException
 	{
 		QueryDefinition query = new QueryDefinition( );
@@ -2597,7 +2567,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param handle
 	 * @return
 	 */
-	protected static String getDataSet( TabularHierarchyHandle handle )
+	private static String getDataSet( TabularHierarchyHandle handle )
 	{
 		if ( handle.getDataSet( ) != null )
 			return handle.getDataSet( ).getQualifiedName( );
@@ -2623,7 +2593,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param hierHandle
 	 * @return
 	 */
-	protected static CubeHandle acquireContainerCube(
+	private static CubeHandle acquireContainerCube(
 			TabularHierarchyHandle hierHandle )
 	{
 		DesignElementHandle handle = hierHandle.getContainer( ).getContainer( );
@@ -2637,7 +2607,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 	 * @param handle
 	 * @return
 	 */
-	protected static Iterator getFilterIterator( TabularHierarchyHandle handle )
+	private static Iterator getFilterIterator( TabularHierarchyHandle handle )
 	{
 		if ( handle.getDataSet( )!= null )
 			return handle.filtersIterator( );
@@ -2745,22 +2715,22 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return this.sessionContext;
 	}
 
-	protected static String getCubeTempPKDimensionName( TabularCubeHandle tch )
+	private static String getCubeTempPKDimensionName( TabularCubeHandle tch )
 	{
 		return "TEMP_PK_DIMENSION_" + tch.hashCode( );
 	}
 
-	protected static String getCubeTempPKHierarchyName( TabularCubeHandle tch )
+	private static String getCubeTempPKHierarchyName( TabularCubeHandle tch )
 	{
 		return "TEMP_PK_HIERARCHY_" + tch.hashCode( );
 	}
 
-	protected static String getCubeTempPKFieldName( TabularCubeHandle tch )
+	private static String getCubeTempPKFieldName( TabularCubeHandle tch )
 	{
 		return "TEMP_PK_" + tch.hashCode( );
 	}
 
-	protected static <T> T[] appendArray( T[] src, T v )
+	private static <T> T[] appendArray( T[] src, T v )
 	{
 		T[] result = (T[])java.lang.reflect.Array.
 			newInstance(src.getClass().getComponentType(), src.length + 1);
@@ -2769,7 +2739,7 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return result;
 	}
 
-	protected static int getColumnDataType( DataSetHandle dsh, String jointHierarchyKey )
+	private static int getColumnDataType( DataSetHandle dsh, String jointHierarchyKey )
 	{
 		CachedMetaDataHandle cmdh = dsh.getCachedMetaDataHandle( );
 		Iterator itr = cmdh.getResultSet( ).iterator( );
@@ -2784,12 +2754,12 @@ public class DataRequestSessionImpl extends DataRequestSession
 		return DataType.STRING_TYPE;
 	}
 
-	protected String getDummyLevelNameForJointHierarchyKey( String hierarchyKey )
+	private String getDummyLevelNameForJointHierarchyKey( String hierarchyKey )
 	{
 		return hierarchyKey + "_Dummy" + this.hashCode( );
 	}
 
-	protected String[] getDummyLevelNamesForJointHierarchyKeys( String[] hierarchyKeys )
+	private String[] getDummyLevelNamesForJointHierarchyKeys( String[] hierarchyKeys )
 	{
 		String[] result = new String[hierarchyKeys.length];
 		int i = 0;

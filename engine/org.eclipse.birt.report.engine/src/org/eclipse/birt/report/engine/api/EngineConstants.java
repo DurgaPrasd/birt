@@ -75,9 +75,4 @@ public class EngineConstants {
 	 * OOM
 	 */
 	public final static String APPCONTEXT_MAX_PAGE_BREAK_INTERVAL = "MAX_PAGE_BREAK_INTERVAL"; //$NON-NLS-1$
-	
-	/**
-	 * The Engine task owning the application context
-	 */
-	public final static String APPCONTEXT_ENGINE_TASK = "EngineTask";
 }

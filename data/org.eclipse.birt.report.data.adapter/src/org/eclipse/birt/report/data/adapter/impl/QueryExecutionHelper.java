@@ -165,9 +165,7 @@ class QueryExecutionHelper
 			}
 			major = handle;
 			defineDataSet( handle, new DataSetHandleProcessContext(major, useResultHints, keepDataSetFilter, allowAggregation) );
-			if ( interceptorContext != null )
-				DefineDataSourceSetUtil.prepareForTransientQuery( sessionContext, (DataEngineImpl)dataEngine, 
-						handle, queryDefn, null, interceptorContext );
+			DefineDataSourceSetUtil.prepareForTransientQuery( sessionContext, (DataEngineImpl)dataEngine, handle, queryDefn, null, interceptorContext );
 		}
 	}
 
